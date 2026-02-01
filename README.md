@@ -20,6 +20,8 @@
 - **Scene Writing**: Individual 500-1000 word scenes (dialogue, combat, explicit/non-explicit)
 - **Image Prompts**: Generate character art prompts for Stable Diffusion, Midjourney, Nano Banana Pro
 
+![NarrAider Screenshot](app_screenshots/NarrAid-screenshot.png)
+
 ## Installation
 
 ### Prerequisites
@@ -316,6 +318,57 @@ For issues, feature requests, or questions:
 - **GitHub**: https://github.com/Uriel1339/NarrAider
 - **Discord**: https://discord.gg/ywecg73emj
 - **Email**: uriel1339@kidbooks.pics
+
+## Example Output
+
+Generated using **gemma-3-27b-it-Q4_K_M.gguf** on an RTX 4090 with 64GB RAM. Total generation time: ~3-4 minutes (including model loading and llama server startup).
+
+<details>
+<summary>Character Profile: Borghild Stonehand (click to expand)</summary>
+
+### Character Profile: Borghild Stonehand
+
+**BASIC INFORMATION**
+* Full Name: Borghild Stonehand
+* Age & Species: 45 years, Dwarf (Shield Dwarf)
+* Physical Appearance: 4'8". Stocky build. Muscle-corded arms. Weather-beaten face. A network of burn scars tracing her left arm and cheek. Braided dark brown hair streaked with grey. Piercing blue eyes.
+* Occupation/Role: Engineer, Runesmith, Seeker of Redemption
+
+**PERSONALITY**
+* Core Personality Traits: Pragmatic. Resilient. Gruff. Loyal. Secretly compassionate.
+* Strengths & Weaknesses: Ingenious problem-solver. Unwavering determination. Skilled craftswoman. Stubborn. Holds grudges. Trusts slowly. Self-blaming.
+* Motivations & Goals: To atone for past failures. Rebuild her legacy. Create something lasting and beneficial. Prove her worth.
+* Fears & Vulnerabilities: Fire. Losing control. Failing others. Being perceived as weak. Her past catching up to her.
+
+**BACKGROUND**
+* Origin/Birthplace: Kraghammer, a mountain hold renowned for its engineering prowess.
+* Family & Early Life: Borghild came from a long line of Stonehand smiths. Her father was the Master Engineer of Kraghammer. He instilled in her a love for intricate mechanisms and runic power. She had one younger brother, lost to a mining accident at age 12.
+* Formative Experiences: The fire. Ten years ago, Borghild's forge – her pride and joy – burned down. A faulty rune sequence triggered an explosion. Several apprentices were injured. Blame fell on her. She was exiled, stripped of her title. This haunts her.
+* Current Situation: Wandering the land. Accepting odd jobs as a repairwoman. Seeking rare components for a new project. Avoiding detection by Kraghammer authorities.
+
+**SKILLS & ABILITIES**
+* Special Skills/Talents: Masterful engineer and runesmith. Can diagnose and repair almost any mechanical device. Intuitive understanding of runic energy flow. Able to improvise solutions with limited resources.
+* Combat Abilities: Proficient in using a heavy warhammer. Favors practical, defensive fighting style. Relies on strength and durability. Not an agile fighter.
+* Magic/Tech Proficiency: Expert level in combining runes with mechanical systems. Can create devices powered by runic energy. Limited knowledge of traditional magic. Prefers tangible results.
+* Weaknesses/Limitations: Her creations are complex and require precise calibration. Susceptible to sabotage if someone understands her methods. Physically slower than other races. Overconfidence in her abilities can lead to mistakes.
+
+**APPEARANCE VARIATIONS**
+* Default Outfit: Practical leather tunic and trousers, reinforced with metal plates over the shoulders and knees. Sturdy boots. Tool belt laden with wrenches, screwdrivers, and small components. A soot-stained apron.
+* Combat/Work Outfit: Full steel breastplate. Reinforced leather gauntlets. Thick padded leggings. Helm with a face guard. She wields her warhammer and carries a satchel of repair tools.
+* Formal/Special Occasion Outfit: (Rarely worn) Dark grey dwarven robes embroidered with silver runes. Polished steel belt buckle displaying the Stonehand clan symbol – tarnished from disuse.
+* Distinctive Accessories: A pair of goggles perpetually perched on her forehead. A small, intricately carved stone amulet depicting a hammer and anvil – a gift from her father. The burn scars are always visible.
+
+**CHARACTER PROGRESSION**
+* Arc Potential: Borghild could rediscover her confidence. She might confront the truth about the fire. Redemption through creation is possible. Learning to trust again is crucial for growth. Could become a leader, using her skills to help others.
+* Key Relationships: A young apprentice she reluctantly takes under her wing. A grizzled mercenary captain who provides protection (and challenges). An elven scholar seeking lost runic knowledge. Someone connected to the events surrounding the forge fire.
+* Internal Conflicts: Guilt over the fire versus a desire for forgiveness. Pragmatism versus compassion. Self-reliance versus the need for connection. The weight of her past hindering her future.
+
+**VOICE & MANNERISMS**
+* Speech patterns: Direct and concise. Uses few unnecessary words. Often speaks in technical jargon. Sarcastic undertones. Short, clipped sentences. Rarely uses honorifics.
+* Distinctive mannerisms: Constantly fiddles with tools or components. Scowls frequently. Taps her fingers when thinking. Inspects everything critically. Has a habit of muttering to herself while working.
+* Emotional tells: A slight tremor in her voice when discussing the fire. Her grip tightens on her hammer when angered. A rare, fleeting smile reveals a glimpse of vulnerability. She avoids direct eye contact when lying or ashamed. When truly focused she will forget to blink.
+
+</details>
 
 ## Changelog
 
