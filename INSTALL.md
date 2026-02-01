@@ -1,5 +1,7 @@
 # Installation Guide for New Users
 
+![NarrAider Logo](narraider-logo.jpg)
+
 **Created by Andreas "Uriel1339" Lopez**
 
 This guide walks you through installing NarrAider from a fresh clone of the GitHub repository.

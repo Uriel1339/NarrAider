@@ -1,5 +1,7 @@
 # NarrAider Quick Start Guide
 
+![NarrAider Logo](narraider-logo.jpg)
+
 **Created by Andreas "Uriel1339" Lopez**
 
 ## First Time Setup (5 minutes)

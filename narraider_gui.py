@@ -12,6 +12,11 @@ import threading
 import queue
 from pathlib import Path
 import json
+try:
+    from PIL import Image, ImageTk
+    PILLOW_AVAILABLE = True
+except ImportError:
+    PILLOW_AVAILABLE = False
 
 # Import core functionality
 from narraider import (
@@ -20,11 +25,32 @@ from narraider import (
     TEMPLATES, VERSION
 )
 
+def set_window_icon(window):
+    """Set the NarrAider logo as window icon if available."""
+    if not PILLOW_AVAILABLE:
+        return
+
+    logo_path = Path(__file__).parent / "narraider-logo.jpg"
+    if not logo_path.exists():
+        return
+
+    try:
+        # Load and resize logo for icon use
+        img = Image.open(logo_path)
+        img = img.resize((64, 64), Image.Resampling.LANCZOS)
+        photo = ImageTk.PhotoImage(img)
+        window.iconphoto(True, photo)
+        # Keep reference to prevent garbage collection
+        window._logo_image = photo
+    except Exception as e:
+        print(f"Warning: Could not load logo: {e}")
+
 class NarrAiderGUI:
     def __init__(self, root):
         self.root = root
         self.root.title(f"NarrAider {VERSION} - Narrative Creation Assistant")
         self.root.geometry("1000x800")
+        set_window_icon(self.root)
 
         # Generation queue for threading
         self.gen_queue = queue.Queue()

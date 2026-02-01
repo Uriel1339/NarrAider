@@ -1,5 +1,7 @@
 # NarrAider - AI-Powered Narrative Creation Assistant
 
+![NarrAider Logo](narraider-logo.jpg)
+
 **Created by Andreas "Uriel1339" Lopez**
 
 **NarrAider** (Narrator + Aid) is a local AI tool for writers to generate worldbuilding content, character profiles, lore documents, magic systems, and individual scenes using local LLMs.
@@ -309,9 +311,9 @@ MIT License - Free for personal and commercial use
 ## Support
 
 For issues, feature requests, or questions:
-- GitHub: [Your repo URL]
-- Discord: [Your server]
-- Email: [Your email]
+- **GitHub**: https://github.com/Uriel1339/NarrAider
+- **Discord**: https://discord.gg/ywecg73emj
+- **Email**: uriel1339@kidbooks.pics
 
 ## Changelog
 

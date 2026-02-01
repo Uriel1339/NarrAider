@@ -1,8 +1,8 @@
 {
-  "llama_server_path": "/path/to/llama-server/llama-server.exe",
+  "llama_server_path": "C:/Users/Andreas Lopez/Downloads/llama-b7819-bin-win-cuda-12.4-x64/llama-server.exe",
   "models": {
-    "worldbuilding": "/path/to/models/google_gemma-3-27b-it-Q4_K_M.gguf",
-    "explicit": "/path/to/models/amoral-gemma3-27B-v2-i1-Q4_K_M.gguf"
+    "worldbuilding": "C:/Users/Andreas Lopez/Downloads/llama-b7819-bin-win-cuda-12.4-x64/models/gemma-3-27b-it-Q4_K_M.gguf",
+    "explicit": "C:/Users/Andreas Lopez/Downloads/llama-b7819-bin-win-cuda-12.4-x64/models/amoral-gemma3-27B-v2-Q4_K_M.gguf"
   },
   "server_port": 8081,
   "context_size": 8192,
@@ -15,5 +15,8 @@
     "top_k": 40,
     "repeat_penalty": 1.1,
     "max_tokens": 2048
+  },
+  "custom_system_prompts": {
+    "test": "abcfd"
   }
 }

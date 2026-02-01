@@ -74,7 +74,8 @@ def get_default_config():
             "top_k": 40,
             "repeat_penalty": 1.1,
             "max_tokens": 2048
-        }
+        },
+        "custom_system_prompts": {}  # User-defined system prompts
     }
 
 # Backward compatibility
@@ -92,7 +93,7 @@ def log(message):
 
 def load_config():
     """Load configuration from file or create default."""
-    global CONFIG
+    global CONFIG, SYSTEM_PROMPTS
     config_path = Path(__file__).parent / "narraider_config.json"
 
     if config_path.exists():
@@ -107,6 +108,61 @@ def load_config():
 
     # Ensure output folder exists
     Path(CONFIG["output_folder"]).mkdir(parents=True, exist_ok=True)
+
+    # Merge custom system prompts if they exist
+    if "custom_system_prompts" in CONFIG and CONFIG["custom_system_prompts"]:
+        # Create a new dict with built-in prompts first, then custom ones
+        merged_prompts = SYSTEM_PROMPTS.copy()
+        merged_prompts.update(CONFIG["custom_system_prompts"])
+        # Update the global SYSTEM_PROMPTS
+        SYSTEM_PROMPTS = merged_prompts
+
+def save_custom_system_prompt(name, prompt_text):
+    """Save a custom system prompt to config."""
+    global CONFIG, SYSTEM_PROMPTS
+    config_path = Path(__file__).parent / "narraider_config.json"
+
+    # Ensure custom_system_prompts exists in config
+    if "custom_system_prompts" not in CONFIG:
+        CONFIG["custom_system_prompts"] = {}
+
+    # Add the new custom prompt
+    CONFIG["custom_system_prompts"][name] = prompt_text
+
+    # Save to file
+    with open(config_path, 'w', encoding='utf-8') as f:
+        json.dump(CONFIG, f, indent=2)
+
+    # Update SYSTEM_PROMPTS in memory
+    SYSTEM_PROMPTS[name] = prompt_text
+    log(f"Custom system prompt '{name}' saved")
+
+def delete_custom_system_prompt(name):
+    """Delete a custom system prompt from config."""
+    global CONFIG, SYSTEM_PROMPTS
+    config_path = Path(__file__).parent / "narraider_config.json"
+
+    # Remove from config
+    if "custom_system_prompts" in CONFIG and name in CONFIG["custom_system_prompts"]:
+        del CONFIG["custom_system_prompts"][name]
+
+        # Save to file
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(CONFIG, f, indent=2)
+
+        # Remove from SYSTEM_PROMPTS in memory
+        if name in SYSTEM_PROMPTS:
+            del SYSTEM_PROMPTS[name]
+
+        log(f"Custom system prompt '{name}' deleted")
+        return True
+    return False
+
+def is_custom_system_prompt(name):
+    """Check if a system prompt is custom (user-created)."""
+    if "custom_system_prompts" not in CONFIG:
+        return False
+    return name in CONFIG.get("custom_system_prompts", {})
 
 def kill_server():
     """Kill the running llama.cpp server."""
@@ -195,29 +251,44 @@ def start_server(model_path, model_name):
         traceback.print_exc()
         return False
 
-    log("Waiting for server to initialize (large models may take up to 2 minutes)...")
-    time.sleep(15)
+    log("Waiting for server to initialize (large models may take up to 3-4 minutes)...")
+    time.sleep(20)
 
     # Poll for ready (increased timeout for large 27B models)
-    for attempt in range(90):
+    # 180 attempts = 3 minutes after initial 20 second wait = ~3:20 total
+    for attempt in range(180):
         if is_server_healthy():
             log(f"{model_name} is ready!")
             CURRENT_MODEL = model_name
             return True
         time.sleep(1)
+        # Progress indicator every 30 seconds
+        if attempt > 0 and attempt % 30 == 0:
+            log(f"Still loading... ({attempt} seconds elapsed)")
 
-    log(f"ERROR: Server failed to start within timeout")
+    log(f"ERROR: Server failed to start within timeout (~3 minutes)")
 
     # Try to capture server output for debugging
     if SERVER_PROCESS.poll() is not None:
-        stdout, stderr = SERVER_PROCESS.communicate()
-        if stdout:
-            log(f"Server stdout: {stdout[:500]}")
-        if stderr:
-            log(f"Server stderr: {stderr[:500]}")
+        # Server crashed
+        log("Server process terminated unexpectedly")
+        try:
+            stdout, stderr = SERVER_PROCESS.communicate(timeout=2)
+            if stdout:
+                log(f"Server stdout:\n{stdout[:1000]}")
+            if stderr:
+                log(f"Server stderr:\n{stderr[:1000]}")
+        except:
+            log("Could not capture server output")
     else:
+        # Server still running but not healthy
         log("Server process is still running but not responding to health checks")
-        log("Check the server console window for error messages")
+        log("Possible causes:")
+        log("  1. Model is too large for available VRAM - try reducing gpu_layers or context_size")
+        log("  2. CUDA drivers not installed or incompatible")
+        log("  3. Model file is corrupted - verify download completed successfully")
+        log("  4. Port 8081 is blocked by firewall")
+        log("\nCheck the server console window for detailed error messages")
 
     kill_server()
     return False

@@ -19,6 +19,11 @@ import urllib.request
 import hashlib
 from pathlib import Path
 from datetime import datetime
+try:
+    from PIL import Image, ImageTk
+    PILLOW_AVAILABLE = True
+except ImportError:
+    PILLOW_AVAILABLE = False
 
 # Version
 VERSION = "2.0.0"
@@ -28,7 +33,8 @@ try:
     from narraider import (
         load_config, ensure_model_loaded, generate_content,
         save_output, kill_server,
-        TEMPLATES, SYSTEM_PROMPTS
+        TEMPLATES, SYSTEM_PROMPTS,
+        save_custom_system_prompt, delete_custom_system_prompt, is_custom_system_prompt
     )
     import narraider
     # Load config immediately (load_config sets narraider.CONFIG as a side effect)
@@ -43,6 +49,26 @@ except Exception as e:
     print(f"ERROR: Failed to initialize: {e}")
     sys.exit(1)
 
+def set_window_icon(window):
+    """Set the NarrAider logo as window icon if available."""
+    if not PILLOW_AVAILABLE:
+        return
+
+    logo_path = Path(__file__).parent / "narraider-logo.jpg"
+    if not logo_path.exists():
+        return
+
+    try:
+        # Load and resize logo for icon use
+        img = Image.open(logo_path)
+        img = img.resize((64, 64), Image.Resampling.LANCZOS)
+        photo = ImageTk.PhotoImage(img)
+        window.iconphoto(True, photo)
+        # Keep reference to prevent garbage collection
+        window._logo_image = photo
+    except Exception as e:
+        print(f"Warning: Could not load logo: {e}")
+
 class SetupWizard:
     """First-time setup wizard for beginners."""
 
@@ -50,6 +76,7 @@ class SetupWizard:
         self.window = tk.Toplevel(parent)
         self.window.title("NarrAider Setup Wizard")
         self.window.geometry("700x500")
+        set_window_icon(self.window)
         self.window.transient(parent)
         self.window.grab_set()
 
@@ -572,6 +599,7 @@ class NarrAiderUnified:
         self.root = root
         self.root.title(f"NarrAider {VERSION} - Unified Creation Suite")
         self.root.geometry("1200x800")
+        set_window_icon(self.root)
 
         # Check if first run
         config_path = Path(__file__).parent / "narraider_config.json"
@@ -719,14 +747,14 @@ class NarrAiderUnified:
         system_select_frame.pack(fill=tk.X, pady=(2, 0))
 
         self.system_prompt = tk.StringVar(value="Default")
-        system_combo = ttk.Combobox(
+        self.system_combo = ttk.Combobox(
             system_select_frame,
             textvariable=self.system_prompt,
             values=list(SYSTEM_PROMPTS.keys()),
             state="readonly",
             width=20
         )
-        system_combo.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.system_combo.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         ttk.Button(
             system_select_frame,
@@ -1469,6 +1497,10 @@ See README.md for complete documentation
 See INTEGRATION_GUIDE.md for advanced features
 
 *** HAVE FUN CREATING!
+
+---
+"Like the Gundam Heavy Arms, NarrAider brings maximum creative firepower.
+Just keep your targeting systems locked on your story goals!" - Trowa Barton (probably)
 """
 
         help_text.insert("1.0", guide)
@@ -1659,22 +1691,30 @@ See INTEGRATION_GUIDE.md for advanced features
         # Default: just add guideline hints
         return f"{original}\n\nConsider adding more details:\n{guideline}"
 
+    def refresh_system_prompts_dropdown(self):
+        """Refresh the system prompts dropdown with current prompts."""
+        self.system_combo['values'] = list(narraider.SYSTEM_PROMPTS.keys())
+
     def view_system_prompts(self):
         """Show system prompts viewer/editor dialog."""
+        # Refresh main dropdown first in case prompts were loaded from config
+        self.refresh_system_prompts_dropdown()
+
         dialog = tk.Toplevel(self.root)
-        dialog.title("System Prompts - View/Edit")
-        dialog.geometry("700x500")
+        dialog.title("System Prompts - View/Edit/Create")
+        dialog.geometry("800x600")
         dialog.transient(self.root)
         dialog.grab_set()
+        set_window_icon(dialog)
 
         # Instructions
         ttk.Label(
             dialog,
-            text="System prompts guide the AI's tone and style. Select a prompt to view its content:",
-            wraplength=650
+            text="System prompts guide the AI's tone and style. Built-in prompts are read-only. You can create custom prompts!",
+            wraplength=750
         ).pack(padx=10, pady=10)
 
-        # Prompt selector
+        # Prompt selector and buttons frame
         selector_frame = ttk.Frame(dialog)
         selector_frame.pack(fill=tk.X, padx=10, pady=(0, 10))
 
@@ -1684,14 +1724,80 @@ See INTEGRATION_GUIDE.md for advanced features
         prompt_combo = ttk.Combobox(
             selector_frame,
             textvariable=current_prompt,
-            values=list(SYSTEM_PROMPTS.keys()),
+            values=list(narraider.SYSTEM_PROMPTS.keys()),
             state="readonly",
-            width=20
+            width=25
         )
-        prompt_combo.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        prompt_combo.pack(side=tk.LEFT, padx=(0, 10))
+
+        # Buttons frame
+        buttons_frame = ttk.Frame(selector_frame)
+        buttons_frame.pack(side=tk.LEFT)
+
+        def create_new_prompt():
+            """Create a new custom system prompt."""
+            # Name dialog
+            name_dialog = tk.Toplevel(dialog)
+            name_dialog.title("New Custom Prompt")
+            name_dialog.geometry("400x150")
+            name_dialog.transient(dialog)
+            name_dialog.grab_set()
+
+            ttk.Label(name_dialog, text="Enter a name for your custom system prompt:").pack(padx=10, pady=10)
+
+            name_var = tk.StringVar()
+            name_entry = ttk.Entry(name_dialog, textvariable=name_var, width=40)
+            name_entry.pack(padx=10, pady=(0, 10))
+            name_entry.focus()
+
+            def save_new():
+                name = name_var.get().strip()
+                if not name:
+                    messagebox.showwarning("Invalid Name", "Please enter a name.")
+                    return
+
+                # Check if name already exists
+                if name in narraider.SYSTEM_PROMPTS:
+                    messagebox.showwarning("Name Exists", f"A prompt named '{name}' already exists. Choose a different name.")
+                    return
+
+                # Save with empty content initially
+                save_custom_system_prompt(name, "")
+                # Refresh combo boxes (dialog and main window)
+                prompt_combo['values'] = list(narraider.SYSTEM_PROMPTS.keys())
+                self.refresh_system_prompts_dropdown()
+                current_prompt.set(name)
+                name_dialog.destroy()
+                messagebox.showinfo("Success", f"Custom prompt '{name}' created! Edit it below and click 'Save Changes'.")
+
+            button_frame = ttk.Frame(name_dialog)
+            button_frame.pack(pady=10)
+            ttk.Button(button_frame, text="Create", command=save_new).pack(side=tk.LEFT, padx=5)
+            ttk.Button(button_frame, text="Cancel", command=name_dialog.destroy).pack(side=tk.LEFT, padx=5)
+
+        def delete_prompt():
+            """Delete the currently selected custom prompt."""
+            selected = current_prompt.get()
+            if not selected:
+                return
+
+            if not is_custom_system_prompt(selected):
+                messagebox.showwarning("Cannot Delete", "Built-in prompts cannot be deleted. Only custom prompts can be removed.")
+                return
+
+            if messagebox.askyesno("Confirm Delete", f"Delete custom prompt '{selected}'?"):
+                delete_custom_system_prompt(selected)
+                # Refresh combo boxes (dialog and main window)
+                prompt_combo['values'] = list(narraider.SYSTEM_PROMPTS.keys())
+                self.refresh_system_prompts_dropdown()
+                current_prompt.set("Default")
+                messagebox.showinfo("Deleted", f"Custom prompt '{selected}' deleted.")
+
+        ttk.Button(buttons_frame, text="Create New", command=create_new_prompt, width=12).pack(side=tk.LEFT, padx=2)
+        ttk.Button(buttons_frame, text="Delete", command=delete_prompt, width=10).pack(side=tk.LEFT, padx=2)
 
         # Text display
-        text_frame = ttk.LabelFrame(dialog, text="Prompt Content", padding=10)
+        text_frame = ttk.LabelFrame(dialog, text="Prompt Content (Editable for Custom Prompts)", padding=10)
         text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
 
         text_widget = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD, height=15)
@@ -1700,35 +1806,46 @@ See INTEGRATION_GUIDE.md for advanced features
         def update_display(*args):
             """Update the text display when selection changes."""
             selected = current_prompt.get()
-            content = SYSTEM_PROMPTS.get(selected, "")
+            content = narraider.SYSTEM_PROMPTS.get(selected, "")
             text_widget.config(state=tk.NORMAL)
             text_widget.delete("1.0", tk.END)
             if content:
                 text_widget.insert("1.0", content)
             else:
                 text_widget.insert("1.0", "(No system prompt - model uses default behavior)")
-            text_widget.config(state=tk.DISABLED)
+
+            # Make read-only for built-in prompts, editable for custom
+            if is_custom_system_prompt(selected):
+                text_widget.config(state=tk.NORMAL, background="white")
+            else:
+                text_widget.config(state=tk.DISABLED, background="#f0f0f0")
+
+        def save_changes():
+            """Save changes to custom prompt."""
+            selected = current_prompt.get()
+            if not is_custom_system_prompt(selected):
+                messagebox.showinfo("Read-Only", "Built-in prompts cannot be edited. Create a new custom prompt instead.")
+                return
+
+            content = text_widget.get("1.0", tk.END).strip()
+            save_custom_system_prompt(selected, content)
+            messagebox.showinfo("Saved", f"Custom prompt '{selected}' saved!")
 
         # Initial display
         update_display()
         current_prompt.trace_add("write", update_display)
 
         # Info text
-        info_text = """
-NOTE: System prompts are currently read-only. To customize, edit the SYSTEM_PROMPTS
-dictionary in narraider.py. Future versions will support custom user prompts.
+        info_text = """Built-in Prompts: Default, Detailed, Concise, Creative, Explicit
+Custom prompts appear below built-in ones. Edit them and click 'Save Changes' to update."""
 
-TIPS:
-- "Default" = No system prompt (model's natural behavior)
-- "Explicit" = Optimized for adult/romantic content
-- "Detailed" = Rich descriptions, specific details
-- "Concise" = Short, punchy prose
-- "Creative" = Experimental, boundary-pushing ideas
-"""
         ttk.Label(dialog, text=info_text, justify=tk.LEFT, foreground="#666").pack(padx=10, pady=(0, 10))
 
-        # Close button
-        ttk.Button(dialog, text="Close", command=dialog.destroy, width=15).pack(pady=(0, 10))
+        # Bottom buttons
+        button_frame = ttk.Frame(dialog)
+        button_frame.pack(pady=(0, 10))
+        ttk.Button(button_frame, text="Save Changes", command=save_changes, width=15).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Close", command=dialog.destroy, width=15).pack(side=tk.LEFT, padx=5)
 
     def generate(self):
         """Start generation."""
