@@ -1,6 +1,6 @@
 # NarrAider - AI-Powered Narrative Creation Assistant
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/andreaslopez)
+[![Support NarrAider](https://img.shields.io/badge/Support_NarrAider-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/andreaslopez)
 
 ![NarrAider Logo](narraider-logo.jpg)
 
