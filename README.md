@@ -1,5 +1,7 @@
 # NarrAider - AI-Powered Narrative Creation Assistant
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/andreaslopez)
+
 ![NarrAider Logo](narraider-logo.jpg)
 
 **Created by Andreas "Uriel1339" Lopez**
