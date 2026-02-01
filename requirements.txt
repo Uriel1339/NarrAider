@@ -1,0 +1,13 @@
+# NarrAider Requirements
+# Python 3.8+ required
+
+# Core dependencies
+requests>=2.31.0
+
+# GUI (built-in with Python, but may need separate install on some Linux distros)
+# For Debian/Ubuntu: sudo apt-get install python3-tk
+# For Fedora: sudo dnf install python3-tkinter
+# For macOS/Windows: Included with Python
+
+# Optional but recommended
+Pillow>=10.0.0  # For image handling in future features

@@ -1,0 +1,19 @@
+{
+  "llama_server_path": "/path/to/llama-server/llama-server.exe",
+  "models": {
+    "worldbuilding": "/path/to/models/google_gemma-3-27b-it-Q4_K_M.gguf",
+    "explicit": "/path/to/models/amoral-gemma3-27B-v2-i1-Q4_K_M.gguf"
+  },
+  "server_port": 8081,
+  "context_size": 8192,
+  "gpu_layers": 99,
+  "output_folder": "outputs",
+  "keep_server_loaded": false,
+  "generation_params": {
+    "temperature": 0.8,
+    "top_p": 0.9,
+    "top_k": 40,
+    "repeat_penalty": 1.1,
+    "max_tokens": 2048
+  }
+}
